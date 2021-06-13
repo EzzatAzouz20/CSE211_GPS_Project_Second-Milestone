@@ -65,3 +65,57 @@ GPIO_PORTA_AFSEL_R |= 0x03 ;
 GPIO_PORTA_PCTL_R = (GPIO_PORTA_PCTL_R&0XFFFFF00)|0x00000011;
 GPIO_PORTA_DEN_R |= 0x03;
 }
+
+
+
+char UART_Read(void){
+	while ((UART1_FR_R&0x0010) != 0);    //busy waiting 
+	
+	return (UART1_DR_R&0xFF);  
+}
+uint8_t uart0_available(void)
+{
+	return((UART0_FR_R&UART_FR_RXFE)==UART_FR_RXFE)? 0:1;
+}
+float read(void)
+{
+	while(uart0_available()!=1);
+	return (float)(UART0_DR_R&0xFF);
+}
+void UART0_Write(uint8_t data){
+	while((UART0_FR_R & UART_FR_TXFF) !=0);
+	UART0_DR_R = data;
+}
+int data_line (char * data) {
+
+    char d;
+    int i;
+    i=0;
+    d = UART_Read();
+    while(d != '$') {
+        d = UART_Read();
+    }
+    while (d != '*'){
+        data[i]= d;
+        d = UART_Read();
+        i = i+1;
+    }
+    if(data[1] == 'G' && data[2] == 'P' && data[3] == 'G' && data[4] == 'G' && data[5] == 'A') {
+        return i+1;
+    }
+    else {
+        return -1;
+    }
+}
+void swap(char * LA1, char * LO1, char * LA2, char * LO2)
+{
+	uint8_t i;
+	for( i=0; i<9; i++)
+	{
+		LA1[i] = LA2[i];
+	}
+	for(i=0; i<10; i++)
+	{
+		LO1[i] = LO2[i];
+	}
+}
