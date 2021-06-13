@@ -1,5 +1,5 @@
 #include "stdint.h"
-#include "C:/Keil/EE319Kware/inc/tm4c123gh6pm.h"
+#include "tm4c123gh6pm.h"
 #define RED 0x02
 #include "math.h"
 #include "C:/Keil/EE319Kware/SysTick_4C123/SysTick.h"
@@ -37,12 +37,27 @@ void LCD_command(unsigned char command)
   GPIO_PORTA_DATA_R =0x00;
 }
 
-//delay function in milli seconds
-void delay_millisec( int time)
-{
-	int i,j;
-  for(i=0;i<time;i++)
-  for(j=0;j<3180;j++);
+void systic_init(void){
+    NVIC_ST_CTRL_R=0;
+    NVIC_ST_RELOAD_R=0x00FFFFFF;
+    NVIC_ST_CURRENT_R=0;
+    NVIC_ST_CTRL_R = 0x05;
+}
+	void delay(uint32_t time){
+        NVIC_ST_RELOAD_R = time-1;
+      NVIC_ST_CURRENT_R = 0;
+      while((NVIC_ST_CTRL_R&0X00010000)==0){};
+}
+	void delay_micro(uint32_t time){
+ unsigned long i;
+    for(i=0;i<time;i++)
+    delay(80);
+}
+void delay_milli(uint32_t time){
+ unsigned long i;
+    for(i=0;i<time;i++)
+    delay_micro(1000);
+
 }
 
 void LCD_data(unsigned char data)
@@ -330,3 +345,48 @@ double atof_m(const char *s){
 
     return sign * value/power;
 }
+void LCD_STRING(char *str)
+{
+  uint32_t size;
+	//uint8_t up;
+	uint32_t y;
+	
+	size=strlen(str);
+	//up=1;
+	for(y=0;y<size;y++)
+		{	delay_milli(10);
+			LCD_data(str[y]);
+			
+		}
+}
+int main(){
+	uint32_t size;
+	float lat1_no, lon1_no, lat2_no, lon2_no;
+	float total_dist;
+	char data[90];
+	char lat1[9];
+	char lon1[10];
+	char lat2[9];
+	char lon2[10];
+	char out_test[10] = {'1','2','3','.','2','4','6','7'};
+	uint8_t i=0;
+
+	size = 0;
+	total_dist = 0;
+	UART_Init();
+
+	systic_init();
+	//portF_Init();
+	//switch_inter();
+	LCD_init();
+	UART0_Init();
+		while (i<10){
+			UART0_Write(out_test[i]);
+			i=i+1;
+		}
+	LCD_command(0x01);//clear
+	LCD_command(0x80);// start from 1st line
+	delay_milli(100);
+	
+	delay_milli(10);
+	}
