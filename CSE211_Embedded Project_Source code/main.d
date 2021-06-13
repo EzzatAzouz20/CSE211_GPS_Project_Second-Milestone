@@ -1,0 +1,10 @@
+.\main.o: main.c
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\stdint.h
+.\main.o: tm4c123gh6pm.h
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\math.h
+.\main.o: C:/Keil/EE319Kware/SysTick_4C123/SysTick.h
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\string.h
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\stdio.h
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\stdlib.h
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\time.h
+.\main.o: C:\Keil\ARM\ARMCC\bin\..\include\ctype.h

@@ -378,7 +378,7 @@ void LCD_STRING(char *str)
 		}
 }
 int main(){
-	init();
+
 	uint32_t size;
 	float lat1_no, lon1_no, lat2_no, lon2_no;
 	float total_dist;
@@ -393,7 +393,7 @@ int main(){
 	size = 0;
 	total_dist = 0;
 	UART_Init();
-
+  init();
 	systic_init();
 	//portF_Init();
 	//switch_inter();
