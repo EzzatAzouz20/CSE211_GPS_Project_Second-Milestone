@@ -278,6 +278,20 @@ uint32_t number_digits(uint32_t num)
     }
     return count;
 }
+void LCD_DISTANCE(uint32_t number)
+{ char change[10];
+	uint32_t y;	
+		if(number==0)
+	{LCD_data('0');
+	delay_milli(1);
+	return;}
+	dec_to_str(change,number,number_digits(number));
+		for(y=0;y<number_digits(number);y++)
+		{
+			LCD_data(change[y]);
+			delay_milli(1);
+		}
+}
 
 double atof_m(const char *s){
     int i;
@@ -360,6 +374,7 @@ void LCD_STRING(char *str)
 		}
 }
 int main(){
+	init();
 	uint32_t size;
 	float lat1_no, lon1_no, lat2_no, lon2_no;
 	float total_dist;
@@ -389,4 +404,46 @@ int main(){
 	delay_milli(100);
 	
 	delay_milli(10);
+		LCD_DISTANCE(lon1_no);
+	do {
+		size = data_line(data);
+
+	} while (size == -1);
+
+
+	
+
+	if (parsing(data, lat1, lon1, size))
+	{
+		while (1)
+		{
+			void Turn_Led(void);
+	  LCD_command(0x01);
+		LCD_command(0x80);
+			//uint32_t size;
+			size = 0;
+			lat1_no = atof(lat1);
+			lon1_no = atof(lon1);
+			do {
+				size = data_line(data);
+			} while (size == -1);
+			if (parsing(data, lat2, lon2, size))
+			{
+				lat2_no = atof(lat2);
+				lon2_no = atof(lon2);
+				total_distance(&total_dist, lat1_no, lon1_no, lat2_no, lon2_no);
+				//print dist
+				LCD_command(0x01);//clears
+				LCD_command(0x80);// start from 1st line
+				LCD_STRING("dist=");
+				delay_milli(100);
+				LCD_DISTANCE(total_dist);
+				delay_milli(100);
+
+				swap(lat1, lon1, lat2, lon2);
+				//delay_milli(100);
+			}
+
+		}
+	}
 	}
