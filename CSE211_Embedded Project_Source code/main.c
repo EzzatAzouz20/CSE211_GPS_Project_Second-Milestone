@@ -92,7 +92,11 @@ GPIO_PORTA_PUR_R =0x00;
 	LCD_command(0x38);//2 lines (8 bits data)
 	LCD_command(0x01);//ciear display
 }
-
+//Function to turn on the red led if the distance exceeds 100 meters
+void LED_ON(uint32_t distance){
+	if(distance > 100)
+	GPIO_PORTF_DATA_R = 0x02;   //turn red led on if distance exceeds 100 meters
+}
 //  calculating the taken distance
 float total_distance(float * total_distance ,float lat1, float long1, float lat2, float long2)
 {
