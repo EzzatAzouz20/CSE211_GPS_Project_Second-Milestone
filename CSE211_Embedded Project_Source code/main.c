@@ -10,7 +10,73 @@
 #include <ctype.h>
 #define PI  3.14159265358 
 #define R   6371
+void SystemInit(){}
+// Function to initialize port F 
+void init(){
+SYSCTL_RCGCGPIO_R	|= 0x20;
+while ((SYSCTL_PRGPIO_R&0x20)==0){};
+GPIO_PORTF_LOCK_R = 0x4C4F434B;
+GPIO_PORTF_CR_R = 0x1F;
+GPIO_PORTF_DIR_R = 0x0E;
+GPIO_PORTF_DEN_R = 0x1F;
+GPIO_PORTF_AMSEL_R = 0;
+GPIO_PORTF_AFSEL_R = 0;
+GPIO_PORTF_PCTL_R = 0;
+GPIO_PORTF_PUR_R = 0x11;
+}
 
+
+
+
+//LCD Delay and Command and Data
+void LCD_command(unsigned char command)
+{
+	GPIO_PORTA_DATA_R =0x00;
+  GPIO_PORTB_DATA_R =command;
+  GPIO_PORTA_DATA_R |=0x80;
+  GPIO_PORTA_DATA_R =0x00;
+}
+
+//delay function in milli seconds
+void delay_millisec( int time)
+{
+	int i,j;
+  for(i=0;i<time;i++)
+  for(j=0;j<3180;j++);
+}
+
+void LCD_data(unsigned char data)
+{
+	GPIO_PORTA_DATA_R =0x20;
+  GPIO_PORTB_DATA_R =data;
+  GPIO_PORTA_DATA_R |=0x80;
+  GPIO_PORTA_DATA_R =0x00;
+}
+
+
+void LCD_init(){
+SYSCTL_RCGCGPIO_R|= 0x03;//Enable port A & port B
+while ((SYSCTL_PRGPIO_R&0x03)==0){};
+	
+	//INITIALIZATION OF PORT A
+GPIO_PORTA_DIR_R |= 0xE0;//set A5,A6 & A7 pins to be output
+GPIO_PORTA_DEN_R |= 0xE0;//set A5,A6 & A7 pins to be digital
+GPIO_PORTA_AMSEL_R =0x00;
+GPIO_PORTA_AFSEL_R =0x00;
+GPIO_PORTA_PCTL_R =0x00;
+GPIO_PORTA_PUR_R =0x00;
+	
+//INITIALIZATION OF PORT B
+  GPIO_PORTB_DIR_R = 0xFF;//set all pins to be output
+  GPIO_PORTB_DEN_R = 0xFF;//set all pins to be gigital
+  GPIO_PORTB_AMSEL_R =0x00;
+  GPIO_PORTB_AFSEL_R =0x00;
+  GPIO_PORTB_PCTL_R =0x00;
+  GPIO_PORTB_PUR_R =0x00;
+	LCD_command(0x0F);//turn on display
+	LCD_command(0x38);//2 lines (8 bits data)
+	LCD_command(0x01);//ciear display
+}
 
 //  calculating the taken distance
 float total_distance(float * total_distance ,float lat1, float long1, float lat2, float long2)
@@ -118,4 +184,82 @@ void swap(char * LA1, char * LO1, char * LA2, char * LO2)
 	{
 		LO1[i] = LO2[i];
 	}
+}
+
+
+
+
+
+uint32_t  parsing (char * Gpsdata, char * latitude, char * longitude, int size)
+{	int lat_start, lat_end, lon_start ,lon_end;
+    uint32_t i;
+		uint32_t j;
+		uint32_t k;
+		uint32_t a;
+		uint32_t b;
+		uint32_t flag1;
+	uint32_t flag2;
+	uint32_t comma_counter;
+	flag1=0;
+	flag2=0;
+	comma_counter=0;
+    
+    for(i = 0; i<size; i++) {
+			
+        if(Gpsdata[i] == ',') {
+            comma_counter++;
+            if(comma_counter == 2) {
+                lat_start = i+1;
+            }
+            if(comma_counter == 3) {
+                lat_end = i-1;
+            }
+            if(comma_counter == 4) {
+                lon_start = i+1;
+            }
+            if(comma_counter == 5) {
+                lon_end = i-1;							
+            }
+        }
+    }
+    a = 0;
+    for(j=lat_start; j<=lat_end; j++) {
+        latitude[a] =(char) (Gpsdata[j]);
+        a++;
+			flag1=1;
+    }
+    b = 0;
+    for(k=lon_start; k<=lon_end; k++) {
+        longitude[b] = (char)(Gpsdata[k]);
+        b++;
+			flag2=1;
+    }
+		
+		 
+		if(flag1&&flag2)
+				return 1;
+		else
+		    return 0;
+}
+void dec_to_str (char* str, uint32_t val,uint32_t digits)
+{   
+  uint32_t i=1u;
+
+  for(; i<=digits; i++)
+  {
+    str[digits-i] = (char)((val % 10u) + '0');
+    val/=10u;
+  }
+  str[i-1u] = '\0'; // assuming you want null terminated strings?
+}
+uint32_t number_digits(uint32_t num)
+{
+    uint32_t count;
+    count=0;
+    while(num!=0)
+    {
+        num=num/10;
+        count++;     
+    }
+    return count;
 }
