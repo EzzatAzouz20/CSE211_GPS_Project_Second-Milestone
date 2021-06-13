@@ -263,3 +263,70 @@ uint32_t number_digits(uint32_t num)
     }
     return count;
 }
+
+double atof_m(const char *s){
+    int i;
+	int sign;
+	double value;
+	double power;
+	int powersign;
+	int power2;
+    for(i = 0; isspace(s[i]); ++i);
+        
+
+    
+    sign = (s[i] == '-')? -1 : 1; 
+
+    if(s[i] == '-' || s[i] == '+'){
+        ++i;
+    }
+
+    
+    for(value = 0.0; isdigit(s[i]); ++i){
+        value = value * 10.0 + (s[i] - '0');
+    }
+
+    if(s[i] == '.'){
+        ++i;
+    }
+
+    
+    for(power = 1.0; isdigit(s[i]); ++i){
+        value = value * 10.0 + (s[i] - '0');
+        power *= 10.0;
+    }
+
+    if(s[i] == 'e' || s[i] == 'E'){
+        ++i;
+    }
+    else{
+        return sign * value/power;
+    }
+
+     //The sign following the E
+    powersign = (s[i] == '-')? -1 : 1;
+
+    if(s[i] == '-' || s[i] == '+'){
+        ++i;
+    }
+
+     //The number following the E
+    for(power2 = 0; isdigit(s[i]); ++i){
+        power2 = power2 * 10 + (s[i] - '0');
+    }
+
+    if(powersign == -1){
+        while(power2 != 0){
+            power *= 10;
+            --power2;
+        }
+    }
+    else{
+        while(power2 != 0){
+            power /= 10;
+            --power2;
+        }
+    }
+
+    return sign * value/power;
+}
