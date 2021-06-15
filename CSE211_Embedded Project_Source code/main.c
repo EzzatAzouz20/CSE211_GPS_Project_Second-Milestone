@@ -126,7 +126,7 @@ float total_distance(float * total_distance ,float lat1, float long1, float lat2
 	UART1_FBRD_R = 11;
 	
 	UART1_LCRH_R = 0x00000070;	//no parity one stop & 2 fifos
-	UART1_CTL_R |= 0x00000001;	//ENABLE UART AGAIN
+	UART1_CTL_R |= 0x00000301;	//ENABLE UART AGAIN
 	
 	
 	GPIO_PORTC_AFSEL_R |= 0x30;		
