@@ -115,6 +115,7 @@ float total_distance(float * total_distance ,float lat1, float long1, float lat2
 	
 	return d;
 }
+//initialization of UART
   void UART_Init(void){
 	SYSCTL_RCGCUART_R |= 0x00000002;	// Enable uart1
 	SYSCTL_RCGCGPIO_R |= 0x00000004;	//Enable portc
@@ -136,20 +137,7 @@ float total_distance(float * total_distance ,float lat1, float long1, float lat2
 	GPIO_PORTC_AMSEL_R &= ~0x30;	
 
 }
-void UART0_Init(void)
-{
-SYSCTL_RCGCUART_R |= 1;
-SYSCTL_RCGCGPIO_R |= 1;
-UART0_CTL_R = 0;
-UART0_IBRD_R = 104;
-UART0_FBRD_R = 11;
-UART0_CC_R = 0;
-UART0_LCRH_R = 0x60;
-UART0_CTL_R |= 0x301;
-GPIO_PORTA_AFSEL_R |= 0x03 ;
-GPIO_PORTA_PCTL_R = (GPIO_PORTA_PCTL_R&0XFFFFF00)|0x00000011;
-GPIO_PORTA_DEN_R |= 0x03;
-}
+
 
 
 
@@ -158,19 +146,9 @@ char UART_Read(void){
 	
 	return (UART1_DR_R&0xFF);  
 }
-uint8_t uart0_available(void)
-{
-	return((UART0_FR_R&UART_FR_RXFE)==UART_FR_RXFE)? 0:1;
-}
-float read(void)
-{
-	while(uart0_available()!=1);
-	return (float)(UART0_DR_R&0xFF);
-}
-void UART0_Write(uint8_t data){
-	while((UART0_FR_R & UART_FR_TXFF) !=0);
-	UART0_DR_R = data;
-}
+
+
+
 int data_line (char * data) {
 
     char d;
@@ -192,6 +170,7 @@ int data_line (char * data) {
         return -1;
     }
 }
+//for swap the distance between different lat & long
 void swap(char * LA1, char * LO1, char * LA2, char * LO2)
 {
 	uint8_t i;
@@ -208,7 +187,7 @@ void swap(char * LA1, char * LO1, char * LA2, char * LO2)
 
 
 
-
+//for return the lat & long as a pointer
 uint32_t  parsing (char * Gpsdata, char * latitude, char * longitude, int size)
 {	int lat_start, lat_end, lon_start ,lon_end;
     uint32_t i;
@@ -269,7 +248,7 @@ void dec_to_str (char* str, uint32_t val,uint32_t digits)
     str[digits-i] = (char)((val % 10u) + '0');
     val/=10u;
   }
-  str[i-1u] = '\0'; // assuming you want null terminated strings?
+  str[i-1u] = '\0'; 
 }
 uint32_t number_digits(uint32_t num)
 {
@@ -296,7 +275,7 @@ void LCD_DISTANCE(uint32_t number)
 			delay_milli(1);
 		}
 }
-
+//for conversion from string type to double type
 double atof_m(const char *s){
     int i;
 	int sign;
@@ -336,14 +315,14 @@ double atof_m(const char *s){
         return sign * value/power;
     }
 
-     //The sign following the E
+
     powersign = (s[i] == '-')? -1 : 1;
 
     if(s[i] == '-' || s[i] == '+'){
         ++i;
     }
 
-     //The number following the E
+     
     for(power2 = 0; isdigit(s[i]); ++i){
         power2 = power2 * 10 + (s[i] - '0');
     }
@@ -366,11 +345,11 @@ double atof_m(const char *s){
 void LCD_STRING(char *str)
 {
   uint32_t size;
-	//uint8_t up;
+
 	uint32_t y;
 	
 	size=strlen(str);
-	//up=1;
+
 	for(y=0;y<size;y++)
 		{	delay_milli(10);
 			LCD_data(str[y]);
@@ -387,7 +366,7 @@ int main(){
 	char lon1[10];
 	char lat2[9];
 	char lon2[10];
-	char out_test[10] = {'1','2','3','.','2','4','6','7'};
+	
 	uint8_t i=0;
 
 	size = 0;
@@ -395,16 +374,12 @@ int main(){
 	UART_Init();
   init();
 	systic_init();
-	//portF_Init();
-	//switch_inter();
+	
 	LCD_init();
-	UART0_Init();
-		while (i<10){
-			UART0_Write(out_test[i]);
-			i=i+1;
-		}
-	LCD_command(0x01);//clear
-	LCD_command(0x80);// start from 1st line
+	
+		
+	LCD_command(0x01);
+	LCD_command(0x80);
 	delay_milli(100);
 	
 	delay_milli(10);
@@ -414,9 +389,6 @@ int main(){
 
 	} while (size == -1);
 
-
-	
-
 	if (parsing(data, lat1, lon1, size))
 	{
 		while (1)
@@ -424,7 +396,7 @@ int main(){
 			void Turn_Led(void);
 	  LCD_command(0x01);
 		LCD_command(0x80);
-			//uint32_t size;
+			
 			size = 0;
 			lat1_no = atof_m(lat1);
 			lon1_no = atof_m(lon1);
@@ -436,7 +408,7 @@ int main(){
 				lat2_no = atof_m(lat2);
 				lon2_no = atof_m(lon2);
 				total_distance(&total_dist, lat1_no, lon1_no, lat2_no, lon2_no);
-				//print dist
+				
 				LCD_command(0x01);//clears
 				LCD_command(0x80);// start from 1st line
 				LCD_STRING("dist=");
@@ -445,7 +417,7 @@ int main(){
 				delay_milli(100);
 
 				swap(lat1, lon1, lat2, lon2);
-				//delay_milli(100);
+				
 			}
 
 		}
