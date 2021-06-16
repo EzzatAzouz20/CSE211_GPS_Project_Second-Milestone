@@ -426,15 +426,15 @@ int main(){
 		LCD_command(0x80);
 			//uint32_t size;
 			size = 0;
-			lat1_no = atof(lat1);
-			lon1_no = atof(lon1);
+			lat1_no = atof_m(lat1);
+			lon1_no = atof_m(lon1);
 			do {
 				size = data_line(data);
 			} while (size == -1);
 			if (parsing(data, lat2, lon2, size))
 			{
-				lat2_no = atof(lat2);
-				lon2_no = atof(lon2);
+				lat2_no = atof_m(lat2);
+				lon2_no = atof_m(lon2);
 				total_distance(&total_dist, lat1_no, lon1_no, lat2_no, lon2_no);
 				//print dist
 				LCD_command(0x01);//clears
